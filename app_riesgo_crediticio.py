@@ -59,20 +59,18 @@ with st.container():
     col1, col2 = st.columns(2)
     with col1:
         edad = st.number_input("Edad", 18, 100, 30)
-        ingresos = st.number_input("Ingresos mensuales ($)", 0.0, 100000.0, 3000.0, step=100.0)
+        ingresos = st.number_input("Ingresos Anuales ($)", 0.0, 200000.0, 40000.0, step=500.0)
         experiencia = st.number_input("Años de experiencia laboral", 0.0, 50.0, 5.0)
         home_ownership = st.selectbox("Tipo de propiedad", ["OWN", "RENT", "MORTGAGE", "OTHER"])
         genero = st.selectbox("Género", ["Femenino", "Masculino"])
     with col2:
         monto_prestamo = st.number_input("Monto del préstamo ($)", 0.0, 100000.0, 10000.0, step=1000.0)
-        default_previo = st.selectbox("¿Ha tenido préstamos en default?", ["No", "Sí"])
         nivel_educativo = st.selectbox("Nivel educativo", ["High School", "Associate", "Bachelor", "Master", "Doctorate"])
         loan_intent = st.selectbox("Finalidad del préstamo", ["EDUCATION", "MEDICAL", "VENTURE", "PERSONAL", "HOMEIMPROVEMENT", "DEBTCONSOLIDATION"])
         historial_crediticio = st.number_input("Años de historial crediticio", 0, 50, 5)
 
 # Mapeo de variables
 map_educacion = {'High School': 1, 'Associate': 2, 'Bachelor': 3, 'Master': 4, 'Doctorate': 5}
-default_binario = 0 if default_previo == "Sí" else 1
 genero_binario = 0 if genero == "Femenino" else 1
 is_young = 1 if edad < 25 else 0
 
@@ -98,7 +96,7 @@ if intent_col_key in loan_intent_map:
 # Construcción del input
 X = np.array([[
     edad, genero_binario, map_educacion[nivel_educativo], ingresos, experiencia, monto_prestamo,
-    historial_crediticio, default_binario, loan_to_income_ratio, income_per_year_of_exp, log_income, is_young,
+    historial_crediticio, loan_to_income_ratio, income_per_year_of_exp, log_income, is_young,
     home_ownership_map['person_home_ownership_MORTGAGE'],
     home_ownership_map['person_home_ownership_OTHER'],
     home_ownership_map['person_home_ownership_RENT'],
@@ -122,7 +120,7 @@ if st.button("🔍 Evaluar Riesgo"):
         # Explicación SHAP local (waterfall plot)
         feature_names = [
             "edad", "genero", "educacion", "ingresos", "experiencia", "monto_prestamo",
-            "historial_crediticio", "default_previo", "loan_to_income_ratio", "income_per_year_of_exp", "log_income", "is_young",
+            "historial_crediticio", "loan_to_income_ratio", "income_per_year_of_exp", "log_income", "is_young",
             *home_ownership_cols, *loan_intent_cols
         ]
         explainer = shap.TreeExplainer(model)
@@ -146,7 +144,6 @@ Explica por qué una persona con los siguientes datos tiene un riesgo crediticio
 - Ingresos mensuales: ${ingresos}
 - Monto del préstamo: ${monto_prestamo}
 - Años de experiencia: {experiencia}
-- Historial de default previo: {'Sí' if default_binario == 0 else 'No'}
 - Nivel educativo: {nivel_educativo}
 - Tipo de propiedad: {home_ownership}
 - Finalidad del préstamo: {loan_intent}
