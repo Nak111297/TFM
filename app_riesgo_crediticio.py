@@ -141,7 +141,7 @@ Explica por qué una persona con los siguientes datos tiene un riesgo crediticio
 
 - Edad: {edad}
 - Género: {genero}
-- Ingresos mensuales: ${ingresos}
+- Ingresos Anuales: ${ingresos}
 - Monto del préstamo: ${monto_prestamo}
 - Años de experiencia: {experiencia}
 - Nivel educativo: {nivel_educativo}
