@@ -1,0 +1,21 @@
+__pycache__/
+*.pyc
+*.pkl
+.secrets/
+.streamlit/secrets.toml
+.env
+
+# VS Code
+.vscode/
+
+# macOS
+.DS_Store
+
+# Python envs
+.venv/
+env/
+venv/
+
+# Streamlit logs
+.streamlit/config.toml
+

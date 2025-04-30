@@ -6,6 +6,7 @@ import os
 import requests
 import shap
 import matplotlib.pyplot as plt
+from openai import OpenAI
 
 # Configuración de la página
 st.set_page_config(page_title="Evaluador de Riesgo Crediticio", page_icon="💼", layout="centered")
@@ -44,6 +45,9 @@ st.markdown("""
     }
     </style>
 """, unsafe_allow_html=True)
+
+# Crear cliente de OpenAI
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY") or st.secrets.get("OPENAI_API_KEY"))
 
 # Cargar modelo
 with open("xgb_model_credit_risk.pkl", "rb") as f:
@@ -131,13 +135,9 @@ if st.button("🔍 Evaluar Riesgo"):
         shap.plots._waterfall.waterfall_legacy(explainer.expected_value, shap_values[0], feature_names=feature_names, show=False)
         st.pyplot(fig)
 
-        # Hugging Face
-        hf_token = os.getenv("HF_TOKEN") or st.secrets.get("HF_TOKEN")
-        headers = {"Authorization": f"Bearer {hf_token}"}
-        api_url = "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.1"
-
+        # OpenAI LLM
         prompt = f"""
-Explica por qué una persona con los siguientes datos tiene un riesgo crediticio {riesgo}:
+Eres un asesor financiero. Basado en los siguientes datos, explica por qué una persona tiene un riesgo crediticio {riesgo}:
 
 - Edad: {edad}
 - Género: {genero}
@@ -150,19 +150,22 @@ Explica por qué una persona con los siguientes datos tiene un riesgo crediticio
 - Años de historial crediticio: {historial_crediticio}
 - Probabilidad de impago estimada: {proba:.2%}
 
-Resume en un párrafo profesional y claro.
+Resume en un párrafo profesional, claro y directo.
 """
-        response = requests.post(api_url, headers=headers, json={"inputs": prompt})
-        response.raise_for_status()
-        output = response.json()
 
-        explicacion = output[0]["generated_text"] if isinstance(output, list) else output.get("generated_text", "Sin respuesta")
+        response = client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": "Eres un asesor financiero especializado en evaluación de riesgo crediticio."},
+                {"role": "user", "content": prompt}
+            ]
+        )
 
-        if prompt.strip() in explicacion:
-            explicacion = explicacion.replace(prompt.strip(), "").strip()
-
+        explicacion = response.choices[0].message.content.strip()
         st.markdown("### 💬 Explicación generada por IA:")
         st.info(explicacion)
 
     except Exception as e:
         st.error(f"No se pudo generar la explicación: {str(e)}")
+
+
