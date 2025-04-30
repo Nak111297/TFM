@@ -47,7 +47,9 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Crear cliente de OpenAI
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY") or st.secrets.get("OPENAI_API_KEY"))
+api_key = st.secrets["OPENAI_API_KEY"] if "OPENAI_API_KEY" in st.secrets else os.getenv("OPENAI_API_KEY")
+client = OpenAI(api_key=api_key)
+
 
 # Cargar modelo
 with open("xgb_model_credit_risk.pkl", "rb") as f:
