@@ -5,3 +5,4 @@ shap==0.44.1
 matplotlib==3.8.3
 numpy==1.26.4
 requests==2.31.0
+openai>=1.0.0
